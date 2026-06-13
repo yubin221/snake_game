@@ -1,20 +1,18 @@
 // GameController.h
 // 게임 전체 흐름을 제어하는 클래스.
-//   - 한 스테이지의 실행 루프(입력 수집 → 상태 갱신 → 화면 렌더링)를 담당
-//   - 인트로 / 도움말 / 랭킹 보드 / 스테이지 클리어·게임오버·최종 성공 화면 관리
-//   - Map·Snake·Item·Gate·BlockWall·ScoreBoard 를 소유하고 조율한다
-//   - RankingManager 와 연동해 플레이 결과를 랭킹에 기록한다
 
 #ifndef GAMECONTROLLER_H
 #define GAMECONTROLLER_H
 
 #include <string>
 #include <vector>
-#include "Map.h"
-#include "Snake.h"
+#include "board.h"
+#include "snake.h"
 #include "ScoreBoard.h"
-#include "Gate.h"
-#include "Item.h"
+#include "gate.h"
+#include "food.h"
+#include "poison.h"
+#include "speeditem.h"
 #include "BlockWall.h"
 #include "RankingManager.h"
 
@@ -26,7 +24,7 @@ enum class GameResult {
 
 class GameController {
 public:
-    GameController(int stageNum, const std::string& mapFilePath);
+    GameController(const int stageNum, const std::string& mapFilePath);
     ~GameController() = default;
 
     // 초기화: 맵 로드, 뱀 생성, 스코어보드/아이템 생성
@@ -43,10 +41,10 @@ public:
 
     // 랭킹 보드 화면 표시
     // A 또는 Q 입력에 따라 true/false 반환
-    static bool showRankingBoardScreen(RankingManager& rankingManager, int initialStage, const std::string& bottomMessage, bool allowSwitch);
+    static bool showRankingBoardScreen(const RankingManager& rankingManager, const int initialStage, const std::string& bottomMessage, const bool allowSwitch);
 
     // 랭킹 테이블 그리기 헬퍼 함수
-    static void drawRankingTable(const std::vector<RankingRecord>& ranks, int stageFilter, const std::string& bottomMessage);
+    static void drawRankingTable(const std::vector<RankingRecord>& ranks, const int stageFilter, const std::string& bottomMessage);
 
     // 스테이지 결과 스크린 출력
     // 랭킹 보드 연동, A는 true, Q는 false 반환
@@ -55,7 +53,7 @@ public:
     
     // 최종 성공 스크린 
     // 모든 스테이지 통과, 랭킹 보드 연동, A는 true, Q는 false 반환
-    static bool showTotalClearScreen(RankingManager& rankingManager, int maxLength, int growth, int poison, int speed, int gate);
+    static bool showTotalClearScreen(RankingManager& rankingManager, const int maxLength, const int growth, const int poison, const int speed, const int gate);
 
     // 점수 조회 게터
     // 최종 랭킹 기록용
@@ -75,13 +73,13 @@ private:
     int stageNum;
     std::string mapFilePath;
 
-    Map map;
+    Board board;
     Snake snake;
     ScoreBoard scoreBoard;
     Gate gate;
-    Item growthItem;
-    Item poisonItem;
-    Item speedItem;
+    Food growthItem;
+    Poison poisonItem;
+    SpeedItem speedItem;
     BlockWall blockWall;
 
     bool isRunning;

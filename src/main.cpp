@@ -9,6 +9,7 @@
 #include <string>
 #include "GameController.h"
 #include "RankingManager.h"
+#include "board.h"
 
 int main()
 {
@@ -33,7 +34,7 @@ int main()
     start_color();         // 색상 사용 선언
     
     // 인트로 화면이 처음 켜질 때도 색상이 예쁘게 출력되도록 색상 페어 사전 초기화
-    Map().initColors();
+    Board().initColors();
 
     keypad(stdscr, TRUE);  // 화살표 키 입력 받기
     noecho();              // 입력한 키를 화면에 보여주지 않음
@@ -41,7 +42,7 @@ int main()
     nodelay(stdscr, TRUE); // getch()가 키 없으면 기다리지 않게
 
     // 스테이지 리스트 준비
-    std::vector<std::string> stageFiles = {
+    const std::vector<std::string> stageFiles = {
         "stages/stage1.txt",
         "stages/stage2.txt",
         "stages/stage3.txt",
@@ -81,7 +82,7 @@ int main()
             }
 
             // 게임 루프 실행
-            GameResult result = game.run();
+            const GameResult result = game.run();
 
             if (result == GameResult::QUIT)
             {
@@ -92,7 +93,7 @@ int main()
             {
                 // 게임 오버: 랭킹 등록 및 스크린 출력
                 // A 누르면 true(1단계 재시작), Q 누르면 false(인트로 화면 이동)
-                bool playAgain = game.showGameOverScreen(rankingManager);
+                const bool playAgain = game.showGameOverScreen(rankingManager);
                 if (playAgain)
                 {
                     currentStageIdx = 0; // 처음(1단계)부터 다시 시작
@@ -110,7 +111,7 @@ int main()
                 {
                     // 스테이지 클리어: 랭킹 등록 및 스크린 출력
                     // A 누르면 true(다음 단계 계속), Q 누르면 false(인트로 이동)
-                    bool keepGoing = game.showStageClearScreen(rankingManager);
+                    const bool keepGoing = game.showStageClearScreen(rankingManager);
                     if (keepGoing == false)
                     {
                         break; // 인트로 화면으로 돌아감
@@ -134,7 +135,7 @@ int main()
         {
             // 랭킹 등록 및 게임 클리어 보드 출력
             // A 누르면 다시 시작(currentStageIdx = 0 이 되어 루프 재진입 가능)
-            bool restart = GameController::showTotalClearScreen(rankingManager, finalMax, finalGrowth, finalPoison, finalSpeed, finalGate);
+            const bool restart = GameController::showTotalClearScreen(rankingManager, finalMax, finalGrowth, finalPoison, finalSpeed, finalGate);
             if (restart)
             {
                 // 1단계부터 다시 게임 시작

@@ -29,16 +29,16 @@ public:
     // 파일에서 랭킹 로드
     void loadFromFile(const std::string& filepath = "scoreboard/rankings.txt");
 
-    // 파일에 랭킹 저장
-    void saveToFile(const std::string& filepath = "scoreboard/rankings.txt");
+    // 파일에 랭킹 저장 (const 멤버 함수로 수정)
+    void saveToFile(const std::string& filepath = "scoreboard/rankings.txt") const;
 
     // 새로운 랭킹 레코드 추가 
     // 추가 시 현재 시간 구해서 timestamp 자동 생성
-    void addRecord(int stage, int maxLength, int growth, int poison, int speed, int gate);
+    void addRecord(const int stage, const int maxLength, const int growth, const int poison, const int speed, const int gate);
 
     // 특정 스테이지의 랭킹 리스트 반환
     // 최대 길이 내림차순 정렬 후 상위 10등 + 방금 플레이한 기록이 10등 밖일 시 추가 반환
-    std::vector<RankingRecord> getRankings(int stageFilter) const;
+    std::vector<RankingRecord> getRankings(const int stageFilter) const;
 
     // 방금 플레이한 기록 표시 설정
     void markLatestAsCurrent();
