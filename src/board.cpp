@@ -1,13 +1,13 @@
-// Map.cpp
-// 맵 데이터를 보관하고, 파일에서 읽고, 화면에 그리는 클래스 구현
+// board.cpp
+// 맵 데이터를 보관하고, 파일에서 읽고, 화면에 그리는 Board 클래스 구현
 
-#include "Map.h"
+#include "board.h"
 #include "curses_compat.h" // OS별 curses 호환 레이어
 #include <fstream>
 #include <string>
 
 // 생성자: 맵 전체를 빈칸(0)으로 초기화
-Map::Map()
+Board::Board()
 {
   height = 0;
   width = 0;
@@ -22,7 +22,7 @@ Map::Map()
 
 // 텍스트 파일에서 맵 읽기
 // 파일 형식: 첫 줄에 "행 열", 그 다음부터 한 줄에 한 행씩 숫자 나열
-bool Map::loadFromFile(const char *filename)
+bool Board::loadFromFile(const char * const filename)
 {
   std::ifstream fin(filename);
   if (fin.is_open() == false)
@@ -64,7 +64,7 @@ bool Map::loadFromFile(const char *filename)
 }
 
 // 한 칸 값 읽기. 범위를 벗어나면 WALL 로 처리해서 충돌 검사가 안전하게 됨
-int Map::getCell(int y, int x) const
+int Board::getCell(const int y, const int x) const
 {
   if (y < 0 || y >= height)
     return WALL;
@@ -74,7 +74,7 @@ int Map::getCell(int y, int x) const
 }
 
 // 한 칸 값 바꾸기
-void Map::setCell(int y, int x, int value)
+void Board::setCell(const int y, const int x, const int value)
 {
   if (y < 0 || y >= height)
     return;
@@ -85,7 +85,7 @@ void Map::setCell(int y, int x, int value)
 
 // 5단계 - 벽 개수 파악
 // 가장자리인 IMMUNE_WALL(2)은 제외하고 게이트가 될 수 있는 WALL(1)만 카운트
-int Map::countInternalWalls() const
+int Board::countInternalWalls() const
 {
   int count = 0;
   for (int y = 0; y < height; y++)
@@ -102,7 +102,7 @@ int Map::countInternalWalls() const
 }
 
 // ncurses 색 페어 초기화. 게임 시작할 때 한 번만 부르면 됨.
-void Map::initColors() const
+void Board::initColors() const
 {
   // 맵 요소 드로잉용
   // 오리지널과 동일하게 글자색과 배경색을 통일하여 꽉 찬 블록으로 표현
@@ -130,15 +130,15 @@ void Map::initColors() const
 
 // 맵 전체를 화면에 그리기
 // (offsetY, offsetX) 부터 시작해서, 한 칸은 화면에서 두 글자 폭으로 표시
-void Map::draw(int offsetY, int offsetX) const
+void Board::draw(const int offsetY, const int offsetX) const
 {
   for (int y = 0; y < height; y++)
   {
     for (int x = 0; x < width; x++)
     {
-      int cell = data[y][x];
-      int screenY = offsetY + y;
-      int screenX = offsetX + x * CELL_WIDTH;
+      const int cell = data[y][x];
+      const int screenY = offsetY + y;
+      const int screenX = offsetX + x * CELL_WIDTH;
 
       if (cell == EMPTY)
       {

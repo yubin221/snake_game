@@ -9,8 +9,8 @@
 
 // 현재 시간을 YYYY-MM-DD HH:MM:SS 형태로 포맷팅해서 가져오는 헬퍼 함수
 static std::string getCurrentTimestamp() {
-    std::time_t now = std::time(nullptr);
-    std::tm* localTm = std::localtime(&now);
+    const std::time_t now = std::time(nullptr);
+    const std::tm* const localTm = std::localtime(&now);
     char buf[64];
     std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", localTm);
     return std::string(buf);
@@ -57,7 +57,7 @@ void RankingManager::loadFromFile(const std::string& filepath) {
 }
 
 // 현재 랭킹 기록 전체를 파일에 '|' 구분 형식으로 저장
-void RankingManager::saveToFile(const std::string& filepath) {
+void RankingManager::saveToFile(const std::string& filepath) const {
     std::ofstream fout(filepath);
     if (!fout.is_open()) return;
 
@@ -73,7 +73,7 @@ void RankingManager::saveToFile(const std::string& filepath) {
 }
 
 // 새 플레이 결과를 기록으로 추가 timestamp 는 현재 시각으로 자동 생성
-void RankingManager::addRecord(int stage, int maxLength, int growth, int poison, int speed, int gate) {
+void RankingManager::addRecord(const int stage, const int maxLength, const int growth, const int poison, const int speed, const int gate) {
     RankingRecord r;
     r.timestamp = getCurrentTimestamp();
     r.stage = stage;
@@ -90,7 +90,7 @@ void RankingManager::addRecord(int stage, int maxLength, int growth, int poison,
 // 스테이지별(0=통합) 랭킹을 반환
 // 최대 길이 내림차순으로 정렬
 // 동점 시 stage -> growth -> poison -> speed -> gate -> 시간 순)하고 상위 10등을 추가하고 방금 플레이한 기록이 10등 밖이면 끝에 한 줄 덧붙임
-std::vector<RankingRecord> RankingManager::getRankings(int stageFilter) const {
+std::vector<RankingRecord> RankingManager::getRankings(const int stageFilter) const {
     // 조건에 맞는 레코드 필터링
     std::vector<RankingRecord> filtered;
     for (const auto& r : records) {
@@ -131,7 +131,7 @@ std::vector<RankingRecord> RankingManager::getRankings(int stageFilter) const {
     // 결과 리스트 구성 
     // 상위 10등까지 수집
     std::vector<RankingRecord> result;
-    int limit = std::min(10, (int)filtered.size());
+    const int limit = std::min(10, (int)filtered.size());
     for (int i = 0; i < limit; i++) {
         result.push_back(filtered[i]);
     }

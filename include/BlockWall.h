@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-class Map;
+class Board;
 class Snake;
 
 class BlockWall {
@@ -19,7 +19,7 @@ public:
 
     // 매 tick 호출.
     // 예고 -> 출현 -> 소멸 -> 재출현 흐름을 관리
-    void update(Map& map, const Snake& snake);
+    void update(Board& board, const Snake& snake);
 
 private:
     static const int MAX_CELLS = 5;
@@ -30,13 +30,13 @@ private:
     int cellCount;
 
     // 무작위 도형/위치를 골라 예고(BLOCK_WARN) 로 표시. 성공 시 true
-    bool trySpawnWarn(Map& map, const Snake& snake);
+    bool trySpawnWarn(Board& board, const Snake& snake);
 
     // 예고 칸(BLOCK_WARN)을 실제 벽(BLOCK_WALL)으로 굳힘
-    void hardenToWall(Map& map);
+    void hardenToWall(Board& board);
 
     // 블록 칸을 맵에서 지움 (지정한 셀 값인 칸만 EMPTY 로)
-    void clearCells(Map& map, int onlyIfCell);
+    void clearCells(Board& board, const int onlyIfCell);
 };
 
 #endif

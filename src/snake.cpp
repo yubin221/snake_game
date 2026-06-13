@@ -1,9 +1,10 @@
-// Snake.cpp
+// snake.cpp
 // 뱀 클래스 구현
 
-#include "Snake.h"
-#include "Map.h"
-#include "Gate.h"
+#include "snake.h"
+#include "board.h"
+#include "gate.h"
+#include <cstdlib>
 
 // 생성자: 길이 0, 일단 오른쪽 방향
 Snake::Snake() {
@@ -18,13 +19,16 @@ Snake::Snake() {
 
 // 맵에서 뱀 머리(3) 와 몸통(4) 위치를 찾아서 body 배열에 채움
 // 머리 -> 인접한 몸통 -> 그 몸통의 인접한 몸통 ... 순으로 따라가며 등록
-bool Snake::initFromMap(const Map& map) {
+bool Snake::initFromBoard(const Board& board) {
     // 머리 위치 찾기
     int headY = -1;
     int headX = -1;
-    for (int y = 0; y < map.getHeight(); y++) {
-        for (int x = 0; x < map.getWidth(); x++) {
-            if (map.getCell(y, x) == SNAKE_HEAD) {
+    const int H = board.getHeight();
+    const int W = board.getWidth();
+
+    for (int y = 0; y < H; y++) {
+        for (int x = 0; x < W; x++) {
+            if (board.getCell(y, x) == SNAKE_HEAD) {
                 headY = y;
                 headX = x;
             }
@@ -47,7 +51,7 @@ bool Snake::initFromMap(const Map& map) {
         bool found = false;
 
         // 위 칸 확인
-        if (found == false && map.getCell(curY - 1, curX) == SNAKE_BODY) {
+        if (found == false && board.getCell(curY - 1, curX) == SNAKE_BODY) {
             bool already = false;
             for (int i = 0; i < length; i++) {
                 if (body[i].y == curY - 1 && body[i].x == curX) {
@@ -64,7 +68,7 @@ bool Snake::initFromMap(const Map& map) {
         }
 
         // 아래 칸 확인
-        if (found == false && map.getCell(curY + 1, curX) == SNAKE_BODY) {
+        if (found == false && board.getCell(curY + 1, curX) == SNAKE_BODY) {
             bool already = false;
             for (int i = 0; i < length; i++) {
                 if (body[i].y == curY + 1 && body[i].x == curX) {
@@ -81,7 +85,7 @@ bool Snake::initFromMap(const Map& map) {
         }
 
         // 왼쪽 칸 확인
-        if (found == false && map.getCell(curY, curX - 1) == SNAKE_BODY) {
+        if (found == false && board.getCell(curY, curX - 1) == SNAKE_BODY) {
             bool already = false;
             for (int i = 0; i < length; i++) {
                 if (body[i].y == curY && body[i].x == curX - 1) {
@@ -98,7 +102,7 @@ bool Snake::initFromMap(const Map& map) {
         }
 
         // 오른쪽 칸 확인
-        if (found == false && map.getCell(curY, curX + 1) == SNAKE_BODY) {
+        if (found == false && board.getCell(curY, curX + 1) == SNAKE_BODY) {
             bool already = false;
             for (int i = 0; i < length; i++) {
                 if (body[i].y == curY && body[i].x == curX + 1) {
@@ -123,8 +127,8 @@ bool Snake::initFromMap(const Map& map) {
     // 초기 진행 방향 정하기
     // 머리(body[0])에서 바로 뒤(body[1])의 반대쪽 = 머리가 바라보는 쪽
     if (length >= 2) {
-        int dy = body[0].y - body[1].y;
-        int dx = body[0].x - body[1].x;
+        const int dy = body[0].y - body[1].y;
+        const int dx = body[0].x - body[1].x;
         if (dy == -1) dir = DIR_UP;
         else if (dy == 1) dir = DIR_DOWN;
         else if (dx == -1) dir = DIR_LEFT;
@@ -135,7 +139,7 @@ bool Snake::initFromMap(const Map& map) {
 }
 
 // 두 방향이 서로 반대인지 확인
-bool Snake::isOpposite(Direction a, Direction b) const {
+bool Snake::isOpposite(const Direction a, const Direction b) const {
     if (a == DIR_UP    && b == DIR_DOWN)  return true;
     if (a == DIR_DOWN  && b == DIR_UP)    return true;
     if (a == DIR_LEFT  && b == DIR_RIGHT) return true;
@@ -144,7 +148,7 @@ bool Snake::isOpposite(Direction a, Direction b) const {
 }
 
 // 사용자가 방향키를 누르면 호출됨
-void Snake::requestDirection(Direction d) {
+void Snake::requestDirection(const Direction d) {
     // 현재 방향과 같은 키는 무시 (명세서: 진행방향과 같은 입력 무시)
     if (d == dir) {
         return;
@@ -153,8 +157,8 @@ void Snake::requestDirection(Direction d) {
     nextDir = d;
 }
 
-// 5단계 - 한 tick 진행
-int Snake::move(Map& map, Gate* gate) {
+// 한 tick 진행
+int Snake::move(Board& board, Gate* const gate) {
     // 반대 방향 입력이면 게임 오버 (명세서: 반대 방향키 입력 시 실패)
     if (isOpposite(dir, nextDir) == true) {
         return -1;
@@ -176,14 +180,14 @@ int Snake::move(Map& map, Gate* gate) {
     }
 
     // 충돌 검사
-    int target = map.getCell(newHeadY, newHeadX);
+    int target = board.getCell(newHeadY, newHeadX);
 
     // Gate 통과 처리: 머리가 GATE 셀에 진입하려 하면
     // 다른 Gate 너머 한 칸으로 텔레포트하고 진행 방향도 갱신한다
     if (target == GATE && gate != nullptr) {
         int teleY, teleX;
         Direction teleDir;
-        if (gate->tryTeleport(newHeadY, newHeadX, dir, map,
+        if (gate->tryTeleport(newHeadY, newHeadX, dir, board,
                               teleY, teleX, teleDir) == false) {
             // 출구가 모두 막혀 있으면 통과 불가 -> 게임오버
             return -1;
@@ -192,7 +196,7 @@ int Snake::move(Map& map, Gate* gate) {
         newHeadX = teleX;
         dir      = teleDir;
         nextDir  = teleDir; // 진출 직후 사용자가 누른 키와 충돌 안 나도록 갱신
-        target   = map.getCell(newHeadY, newHeadX);
+        target   = board.getCell(newHeadY, newHeadX);
     }
 
     // 벽 충돌 (워프 흔적 USED_GATE_WALL, 블록 벽 BLOCK_WALL 도 동일하게 충돌)
@@ -209,16 +213,16 @@ int Snake::move(Map& map, Gate* gate) {
         }
     }
 
-    // 5단계 - 이동 전의 target 셀 값을 반환하기 위해 보관
-    int result = target;
+    // 이동 전의 target 셀 값을 반환하기 위해 보관
+    const int result = target;
 
     // 아이템 종류에 따라 꼬리 처리 분기 설정
     if (target == GROWTH_ITEM) {
         length++; // 만약 자라나는 아이템을 먹었다면, 꼬리 증가
     } else {
-        int oldTailY = body[length - 1].y;
-        int oldTailX = body[length - 1].x;
-        map.setCell(oldTailY, oldTailX, EMPTY);
+        const int oldTailY = body[length - 1].y;
+        const int oldTailX = body[length - 1].x;
+        board.setCell(oldTailY, oldTailX, EMPTY);
 
         if (target == POISON_ITEM){
             if (length - 1 < 3) {
@@ -226,7 +230,7 @@ int Snake::move(Map& map, Gate* gate) {
             }
             length--;
             // 독을 먹어서 잘려나간 꼬리 좌표 제거
-            map.setCell(body[length - 1].y, body[length - 1].x, EMPTY);
+            board.setCell(body[length - 1].y, body[length - 1].x, EMPTY);
         }
         // SPEED_ITEM은 길이 변화 없이 속도 변화만 줌
     }
@@ -240,10 +244,10 @@ int Snake::move(Map& map, Gate* gate) {
     body[0].x = newHeadX;
 
     // 맵에 새 위치 표시
-    map.setCell(body[0].y, body[0].x, SNAKE_HEAD);
+    board.setCell(body[0].y, body[0].x, SNAKE_HEAD);
     if (length >= 2) {
         // 머리 바로 뒤 칸은 이제 몸통으로 표시
-        map.setCell(body[1].y, body[1].x, SNAKE_BODY);
+        board.setCell(body[1].y, body[1].x, SNAKE_BODY);
     }
     return result;
 }
